@@ -1,0 +1,15 @@
+Source: emb-buzzer
+Section: unknown
+Priority: optional
+Maintainer: Joonas Kylmälä <joonas.kylmala@jns.fi>
+Standards-Version: 3.9.5
+Build-Depends: debhelper (>=9), perl, libmodern-perl-perl
+
+Package: emb-buzzer
+Architecture: all
+Multi-Arch: foreign
+Depends: perl, libmodern-perl-perl
+Standards-Version: 3.9.5
+Description: makes buzzing sounds using a piezo
+ This module allows easy way to do different sounds
+ using a piezo component attached to your raspberry pi.
