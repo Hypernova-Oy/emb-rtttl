@@ -18,7 +18,7 @@
 
 package Buzzer;
 
-our $VERSION = "0.11";
+our $VERSION = "0.01";
 
 use Modern::Perl;
 use Time::HiRes;
