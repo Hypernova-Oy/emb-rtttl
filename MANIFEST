@@ -4,7 +4,6 @@ debian/compat
 debian/control
 debian/copyright
 debian/patches/series
-debian/postinst
 debian/README.Debian
 debian/rules
 debian/source/format
