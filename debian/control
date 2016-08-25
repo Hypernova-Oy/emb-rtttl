@@ -1,4 +1,4 @@
-Source: emb-buzzer
+Source: libemb-buzzer-perl
 Section: unknown
 Priority: optional
 Maintainer: Joonas Kylmälä <joonas.kylmala@jns.fi>

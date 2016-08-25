@@ -1,3 +1,10 @@
+libemb-buzzer-perl (0.01-2) UNRELEASED; urgency=low
+
+  * Release fixes packages name.
+
+
+ -- Joonas Kylmälä <joonas.kylmala@jns.fi>  Thu, 25 Aug 2016 12:53:00 +0000
+
 emb-buzzer (0.01-1) UNRELEASED; urgency=low
 
   * Initial release.
