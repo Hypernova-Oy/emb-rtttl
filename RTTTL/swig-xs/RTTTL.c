@@ -44,19 +44,19 @@ int defaultTonePin = 1; //Default pin
 
 #define isdigit(n) (n >= '0' && n <= '9')
 
-void play_tone(int tone, uint32_t duration)
+void play_tone(int pin, int tone, uint32_t duration)
 {
-    printf("play_tone(%i, %i)\n",tone, duration);
-    //tone(tonePin, tone);
-    //delay(duration);
-    //tone(tonePin, 0);
+    printf("play_tone(%i, %i, %i)\n",pin, tone, duration);
+    softToneWrite(pin, tone);
+    delay(duration);
+    softToneWrite(pin, 0);
 }
 
-void play_rtttl(int tonePin, char *p)
+void play_rtttl(int pin, char *p)
 {
 
-        //wiringPiSetup();
-        //softToneCreate(tonePin);
+        wiringPiSetup();
+        softToneCreate(pin);
 
         // Absolutely no error checking in here
 
@@ -203,18 +203,18 @@ void play_rtttl(int tonePin, char *p)
 
                 if(note)
                 {
-                        play_tone( notes[(scale - 4) * 12 + note]  ,  duration );
+                        play_tone( pin, notes[(scale - 4) * 12 + note]  ,  duration );
                 }
                 else
                 {
-                        play_tone( 0 , duration );
+                        play_tone( pin, 0 , duration );
                 }
         }
 }
 
 int main(int argc,char const *argv[])
 {
-        play_rtttl(song, defaultTonePin);
+        play_rtttl(defaultTonePin, song);
         return 0;
 }
 
