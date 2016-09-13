@@ -4,17 +4,17 @@
 # Do not make changes to this file unless you know what you are doing--modify
 # the SWIG interface file instead.
 
-package RTTTL;
+package RTTTL::XS;
 use base qw(Exporter);
 use base qw(DynaLoader);
-package RTTTLc;
-bootstrap RTTTL;
-package RTTTL;
+package RTTTL::XSc;
+bootstrap RTTTL::XS;
+package RTTTL::XS;
 @EXPORT = qw();
 
 # ---------- BASE METHODS -------------
 
-package RTTTL;
+package RTTTL::XS;
 
 sub TIEHASH {
     my ($classname,$obj) = @_;
@@ -47,12 +47,12 @@ sub this {
 
 # ------- FUNCTION WRAPPERS --------
 
-package RTTTL;
+package RTTTL::XS;
 
-*play_rtttl = *RTTTLc::play_rtttl;
+*play_rtttl = *RTTTL::XSc::play_rtttl;
 
 # ------- VARIABLE STUBS --------
 
-package RTTTL;
+package RTTTL::XS;
 
 1;

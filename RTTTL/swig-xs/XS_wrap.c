@@ -1487,10 +1487,10 @@ static swig_module_info swig_module = {swig_types, 1, 0, 0, 0, 0};
 
 /* -------- TYPES TABLE (END) -------- */
 
-#define SWIG_init    boot_RTTTL
+#define SWIG_init    boot_RTTTL__XS
 
-#define SWIG_name   "RTTTLc::boot_RTTTL"
-#define SWIG_prefix "RTTTLc::"
+#define SWIG_name   "RTTTL::XSc::boot_RTTTL__XS"
+#define SWIG_prefix "RTTTL::XSc::"
 
 #define SWIGVERSION 0x020012 
 #define SWIG_VERSION SWIGVERSION
@@ -1719,8 +1719,8 @@ extern "C" {
 #endif
 
 #ifdef PERL_OBJECT
-#define MAGIC_CLASS _wrap_RTTTL_var::
-class _wrap_RTTTL_var : public CPerlObj {
+#define MAGIC_CLASS _wrap_RTTTL__XS_var::
+class _wrap_RTTTL__XS_var : public CPerlObj {
 public:
 #else
 #define MAGIC_CLASS
@@ -1809,7 +1809,7 @@ static swig_variable_info swig_variables[] = {
 {0,0,0,0}
 };
 static swig_command_info swig_commands[] = {
-{"RTTTLc::play_rtttl", _wrap_play_rtttl},
+{"RTTTL::XSc::play_rtttl", _wrap_play_rtttl},
 {0,0}
 };
 /* -----------------------------------------------------------------------------
