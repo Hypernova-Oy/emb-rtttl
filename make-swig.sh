@@ -9,8 +9,7 @@ clib="./clib"
 lib="./lib"
 csharedDir="/usr/lib"
 
-if [ $op == compile ]
-then
+function compile {
   gccWiringPiDeps="-lwiringPi -lpthread"
 
   ##BUILD Perl XS madness using handy dandy swig <3
@@ -30,15 +29,25 @@ then
   cp $buildDir/XS.so $lib/RTTTL/
 
   rm -r $buildDir
-
-fi
-
-if [ "$op" == "link" ]
-then
+}
+function link {
   cp $lib/RTTTL/XS.so $csharedDir/XS.so
+}
+function unlink {
+  rm $csharedDir/XS.so
+}
+
+if [ $op == compile ]
+then
+  compile
+elif [ "$op" == "link" ]
+then
+  link
+elif [ "$op" == "unlink" ]
+then
+  unlink
+else
+  compile
+  link
 fi
 
-if [ "$op" == "unlink" ]
-then
-  rm $csharedDir/XS.so
-fi
