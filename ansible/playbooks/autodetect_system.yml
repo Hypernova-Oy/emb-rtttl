@@ -1,0 +1,17 @@
+---
+- hosts: toveri
+  vars:
+    toveri_app_dir: "/home/pi/emb-buzzer"
+    toveri_conf_dir: "{{toveri_app_dir}}/ansible/config"
+    toveri_shared_library_dir: "{{toveri_app_dir}}/lib/RTTTL"
+
+  tasks:
+    - name: Get system Perl include directory
+      shell: perl -e '($INC[-2] && print $INC[-2]) or die "Couldnt get the Perl system include directory";'
+      register: perl_sys_lib_dir
+    - name: Save new system configuration
+      template: src={{toveri_conf_dir}}/system.fact \
+                dest=/etc/ansible/facts.d/system.fact \
+                mode=0644 \
+                owner=root \
+                group=root

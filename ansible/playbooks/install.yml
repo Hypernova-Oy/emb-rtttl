@@ -1,0 +1,26 @@
+---
+- hosts: toveri
+  vars:
+    toveri: "{{ansible_local.system.toveri}}"
+
+  tasks:
+    - name: Compile XS-modules
+      shell: "cd {{toveri.app_dir}} && ./make-swig.sh compile"
+
+    - name: Link XS-modules
+      shell: "cd {{toveri.app_dir}} && ./make-swig.sh link"
+
+    - name: Configure Perl modules
+      shell: "cd {{toveri.app_dir}} && perl Build.PL"
+
+    - name: Build Perl modules
+      shell: "cd {{toveri.app_dir}} && ./Build"
+
+    - name: Install Perl dependencies
+      shell: "cd {{toveri.app_dir}} && ./Build installdeps"
+
+    - name: Install Perl modules
+      shell: "cd {{toveri.app_dir}} && ./Build install"
+
+    - name: Clean build artefacts
+      shell: "cd {{toveri.app_dir}} && ./Build realclean"
