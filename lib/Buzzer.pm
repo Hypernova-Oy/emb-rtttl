@@ -25,6 +25,8 @@ use Time::HiRes;
 
 use GPIO;
 
+use RTTTL::XS;
+
 use constant {
     BUZZ_FREQUENCY => 3050
 };
@@ -41,20 +43,7 @@ sub new {
 sub buzz {
     my ($self, $herz, $playTime) = @_;
 
-    my $buzzer = GPIO->new($self->{buzzerPort});
-    my $waveLength = 1 / $herz;
-
-    # The constant in period calculation is for taking account processing time
-    my $periods = int ( $herz * $playTime * 0.6 );
-    my $halfWave = $waveLength / 2;
-    
-    for (my $i = 0; $i <= $periods; $i++) {
-	$buzzer->turnOn();
-	Time::HiRes::sleep($halfWave);
-	$buzzer->turnOff();
-	Time::HiRes::sleep($halfWave);
-    }
-
+    RTTTL::XS::play_tone($self->{buzzerPort}, $herz, $playTime);
 }
 
 sub beepWithPauses {
