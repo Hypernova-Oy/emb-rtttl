@@ -3,22 +3,24 @@
 use Modern::Perl;
 use Test::More;
 
-use RTTTL;
+use RTTTL::Player;
+
+my $player = RTTTL::Player->new({pin => 1, dir => './rtttl'});
 
 subtest "Listing RTTTLs", \&listRTTTLs;
 sub listRTTTLs {
-    my $songs = RTTTL::getSongs();
-    ok(grep( /^The_Simpsons$/, @array ), "The Simpsons found");
-    ok(grep( /^Star_wars$/, @array ), "Star wars found");
-    ok(grep( /^Top_Gun$/, @array ), "Top Gun found");
+    my $songs = $player->getSongs();
+    ok(grep( /^The_Simpsons.rtttl$/, @$songs ), "The Simpsons found");
+    ok(grep( /^Star_wars.rtttl$/, @$songs ), "Star wars found");
+    ok(grep( /^Top_Gun.rtttl$/, @$songs ), "Top Gun found");
 }
 
 print "Playing Bond\n";
-ok(RTTTL::play_song("Bond"), "Played Bond");
+ok($player->playSong("Bond"), "Played Bond");
 
 
-print "Playing song number 7, indiana\n";
-ok(RTTTL::play_song_number(7), "Played song number 7, indiana");
+print "Playing song index 7, indiana\n";
+ok($player->playSongIndex(7), "Played song index 7, indiana");
 
 
 done_testing;
