@@ -8,11 +8,23 @@ use Proc::PID::File;
 use RTTTL::Player;
 
 my $pin = 1;
+my $rtttlPlayerName = 'rtttl-player';
+
+subtest "Check pid", \&checkPid;
+sub checkPid {
+
+    my $pid = Proc::PID::File->new({name => RTTTL::Player::_makePidFileName($pin), verify => $rtttlPlayerName});
+    forkExec($pin, "Star_wars");
+    ok($pid->alive(), "Pid wrote and alive");
+    RTTTL::Player::_killExistingPlayer($pid);
+
+}
+
 
 subtest "Play two songs in staggered parallel order sharing the same GPIO-pin and kill the first one to let the second one play.", \&parallellKill;
 sub parallellKill {
 
-    my $pid = Proc::PID::File->new({name => RTTTL::Player::_makePidFileName($pin), verify => "play.pl"});
+    my $pid = Proc::PID::File->new({name => RTTTL::Player::_makePidFileName($pin), verify => $rtttlPlayerName});
     ok(! $pid->alive(), "No process running");
 
     forkExec($pin, "Star_wars");
@@ -35,7 +47,7 @@ sub forkExec {
     my ($pin, $song) = @_;
     my $pid = fork();
     if ($pid == 0) { #I am a child
-        exec "perl -Ilib scripts/rtttl-player -p $pin -d rtttl -o 'song-$song'";
+        exec "perl -Ilib scripts/$rtttlPlayerName -p $pin -d rtttl -o 'song-$song'";
         exit 0;
     }
     else {

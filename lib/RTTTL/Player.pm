@@ -84,6 +84,8 @@ sub getSongs {
 
     opendir(D, $self->{dir}) || die "Can't open directory ".$self->{dir}.": $!\n";
     my @list = readdir(D);
+    pop @list; pop @list;
+    @list = sort @list;
     closedir(D);
     return \@list;
 }

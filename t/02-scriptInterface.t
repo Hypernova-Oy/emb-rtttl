@@ -15,12 +15,10 @@ sub listRTTTLs {
     ok(grep( /^Top_Gun.rtttl$/, @$songs ), "Top Gun found");
 }
 
-print "Playing Bond\n";
-ok($player->playSong("Bond"), "Played Bond");
+ok($player->playSong("toveri_access_granted"), "Played Toveri access granted");
+	
 
-
-print "Playing song index 7, indiana\n";
-ok($player->playSongIndex(7), "Played song index 7, indiana");
+ok($player->playSongIndex(1), "Played song index 1, A-Team");
 
 
 done_testing;
