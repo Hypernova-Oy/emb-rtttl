@@ -14,8 +14,8 @@
             state=directory
 
     - name: Save new system facts
-      template: src={{app_dir.stdout}}/ansible/config/system.fact \
-                dest=/etc/ansible/facts.d/system.fact \
+      template: src={{app_dir.stdout}}/ansible/config/emb_rtttl.fact \
+                dest=/etc/ansible/facts.d/emb_rtttl.fact \
                 mode=0644 \
                 owner=root \
                 group=root

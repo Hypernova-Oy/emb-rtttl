@@ -1,7 +1,7 @@
 ---
 - hosts: emb_rtttl
   vars:
-    emb_rtttl: "{{ansible_local.system.emb_rtttl}}"
+    emb_rtttl: "{{ansible_local.emb_rtttl.default}}"
 
   tasks:
     - name: Create system configuration files directory

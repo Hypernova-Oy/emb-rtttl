@@ -50,7 +50,7 @@ sub new {
 }
 
 sub _loadConfig {
-    return Config::Simple->new($confFile)->vars();
+    return Config::Simple->new($confFile)->vars() or die Config::Simple->error();
 }
 
 =head2 _checkPid
