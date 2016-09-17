@@ -35,7 +35,7 @@ sub forkExec {
     my ($pin, $song) = @_;
     my $pid = fork();
     if ($pid == 0) { #I am a child
-        exec "perl -Ilib scripts/play.pl -p $pin -d rtttl -o 'song-$song'";
+        exec "perl -Ilib scripts/rtttl-player -p $pin -d rtttl -o 'song-$song'";
         exit 0;
     }
     else {

@@ -1,29 +1,46 @@
 ---
-- hosts: toveri
+- hosts: emb_rtttl
   vars:
-    toveri: "{{ansible_local.system.toveri}}"
+    emb_rtttl: "{{ansible_local.system.emb_rtttl}}"
 
   tasks:
+    - name: Create system configuration files directory
+      file: path={{emb_rtttl.conf_dir}} \
+            owner=root \
+            group=root \
+            mode=0755 \
+            state=directory
+
+    - name: Install configuration files to system
+      template: src={{emb_rtttl.template_dir}}/emb-rtttl/config \
+                dest={{emb_rtttl.conf_dir}}/config \
+                mode=0644 \
+                owner=root \
+                group=root
+
     - name: Install debian packages
-      apt: name=libproc-pid-file-perl state=present
+      apt: name=libproc-pid-file-perl,libconfig-simple-perl state=present
 
     - name: Compile XS-modules
-      shell: "cd {{toveri.app_dir}} && ./make-swig.sh compile"
+      shell: "cd {{emb_rtttl.app_dir}} && ./make-swig.sh compile"
 
     - name: Link XS-modules
-      shell: "cd {{toveri.app_dir}} && ./make-swig.sh link"
+      shell: "cd {{emb_rtttl.app_dir}} && ./make-swig.sh link"
 
     - name: Configure Perl modules
-      shell: "cd {{toveri.app_dir}} && perl Build.PL"
+      shell: "cd {{emb_rtttl.app_dir}} && perl Build.PL"
 
     - name: Build Perl modules
-      shell: "cd {{toveri.app_dir}} && ./Build"
+      shell: "cd {{emb_rtttl.app_dir}} && ./Build"
 
     - name: Install Perl dependencies
-      shell: "cd {{toveri.app_dir}} && ./Build installdeps"
+      shell: "cd {{emb_rtttl.app_dir}} && ./Build installdeps"
 
     - name: Install Perl modules
-      shell: "cd {{toveri.app_dir}} && ./Build install"
+      shell: "cd {{emb_rtttl.app_dir}} && ./Build install"
 
     - name: Clean build artefacts
-      shell: "cd {{toveri.app_dir}} && ./Build realclean"
+      shell: "cd {{emb_rtttl.app_dir}} && ./Build realclean"
+
+    - name: Copy executables to system path
+      command: "cp {{emb_rtttl.app_dir}}/scripts/rtttl-player /usr/local/bin/"

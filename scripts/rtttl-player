@@ -19,7 +19,7 @@ GetOptions(
     'h|help'                      => \$help,
     'v|verbose:i'                 => \$verbose,
     'p|pin:i'                     => \$pin,
-    'd|dir:s'               => \$dir,
+    'd|dir:s'                     => \$dir,
     'o|operation:s'               => \$operation,
 );
 
@@ -27,6 +27,8 @@ my $usage = <<USAGE;
 
 
 A crappy RTTTL-player to play RTTTL-songs from the given directory
+You can configure some of these options in /etc/emb-rtttl/config
+
 
   -v --verbose            Defaults to 0, minimal output.
                           1, some output
@@ -45,9 +47,9 @@ A crappy RTTTL-player to play RTTTL-songs from the given directory
 
 EXAMPLES:
 
-  perl scripts/play.pl -p 1 -d rtttl -o list
-  perl scripts/play.pl -p 1 -d rtttl -o song-nyancat
-  perl scripts/play.pl -p 1 -d rtttl -o random
+  perl scripts/rtttl-player.pl -p 1 -d rtttl -o list
+  perl scripts/rtttl-player.pl -p 1 -d rtttl -o song-nyancat
+  rtttl-player.pl -p 1 -o random
 
 USAGE
 
@@ -59,14 +61,6 @@ unless ($operation =~ /(^list$)|(^song-\w+)|(^random$)/) {
   print $usage."\n".
         "You must define the --operation. Your --operation is '$operation'\n";
   exit 1;
-}
-unless ($pin && $pin =~ /^\d+$/) {
- print $usage."\n".
-       "You must define the wiringPi --pin to send electricity from";
-}
-unless ($dir) {
- print $usage."\n".
-       "You must define the directory --dir to play from";
 }
 
 

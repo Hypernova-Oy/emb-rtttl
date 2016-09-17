@@ -3,12 +3,12 @@
 #
 # This file is part of emb-buzzer.
 #
-# emb-buzzer is free software: you can redistribute it and/or modify
+# emb-rtttl is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# emb-buzzer is distributed in the hope that it will be useful,
+# emb-rtttl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
@@ -25,25 +25,32 @@ use Modern::Perl;
 use Time::HiRes;
 use File::Slurp;
 use Proc::PID::File;
+use Config::Simple;
 
 use RTTTL::XS;
 
-use constant {
-    BUZZ_FREQUENCY => 3050
-};
+my $confFile = "/etc/emb-rtttl/config";
+my $confOrParamHelperText = "You can do it in conf file '$confFile' or as a cli parameter.";
 
 sub new {
     my ($class, $params) = @_;
-    my $self = {};
+    my $self = _loadConfig();
 
-    $self->{pin} = $params->{pin} or die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.";
-    $self->{dir} = $params->{dir} or die "You must give parameter 'dir' to tell which directory we look for the rtttl-songs.";
+    $self->{pin} = $params->{pin} || $self->{'default.pin'};
+    $self->{dir} = $params->{dir} || $self->{'default.dir'};
+
+    die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.\n$confOrParamHelperText" unless ($self->{pin});
+    die "You must give parameter 'dir' to tell in which directory we look for the rtttl-songs.\n$confOrParamHelperText" unless ($self->{dir});
 
     bless $self, $class;
     $self->_checkPid();
 
     RTTTL::XS::init($self->{pin});
     return $self;
+}
+
+sub _loadConfig {
+    return Config::Simple->new($confFile)->vars();
 }
 
 =head2 _checkPid
@@ -102,24 +109,5 @@ sub playSongIndex {
 
 
 
-
-
-
-
-sub buzz {
-    my ($self, $herz, $playTime) = @_;
-
-    RTTTL::XS::play_tone($self->{pin}, $herz, $playTime);
-}
-
-sub beepWithPauses {
-    my ($self, $beepCount, $pauseInSec, $beebLengthInSec) = @_;
-
-    while ($beepCount >= 1) {
-	$self->buzz(BUZZ_FREQUENCY, $beebLengthInSec);
-	Time::HiRes::sleep($pauseInSec);
-	$beepCount--;
-    }
-}
 
 1;

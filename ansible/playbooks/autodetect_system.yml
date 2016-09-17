@@ -1,17 +1,22 @@
 ---
-- hosts: toveri
-  vars:
-    toveri_app_dir: "/home/pi/emb-buzzer"
-    toveri_conf_dir: "{{toveri_app_dir}}/ansible/config"
-    toveri_shared_library_dir: "{{toveri_app_dir}}/lib/RTTTL"
+- hosts: emb_rtttl
 
   tasks:
-    - name: Get system Perl include directory
-      shell: perl -e '($INC[-2] && print $INC[-2]) or die "Couldnt get the Perl system include directory";'
-      register: perl_sys_lib_dir
-    - name: Save new system configuration
-      template: src={{toveri_conf_dir}}/system.fact \
+    - name: Figure out the application home directory relative to the playbook
+      shell: perl -e '$d = `pwd`."/../.."; while($d =~ s!/[^/]+?/\.\.!!g){}; print $d;'
+      register: app_dir
+
+    - name: Create system facts directory
+      file: path=/etc/ansible/facts.d \
+            owner=root \
+            group=root \
+            mode=0755 \
+            state=directory
+
+    - name: Save new system facts
+      template: src={{app_dir.stdout}}/ansible/config/system.fact \
                 dest=/etc/ansible/facts.d/system.fact \
                 mode=0644 \
                 owner=root \
                 group=root
+
