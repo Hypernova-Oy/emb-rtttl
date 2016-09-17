@@ -4,6 +4,9 @@
     toveri: "{{ansible_local.system.toveri}}"
 
   tasks:
+    - name: Install debian packages
+      apt: name=libproc-pid-file-perl state=present
+
     - name: Compile XS-modules
       shell: "cd {{toveri.app_dir}} && ./make-swig.sh compile"
 

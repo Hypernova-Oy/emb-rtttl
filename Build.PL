@@ -16,6 +16,7 @@ my $build = Module::Build->new
 	 'Modern::Perl' => '1',
 	 'Time::HiRes' => '1.9',
 	 'GPIO' => '0.01',
+         'Proc::PID::File',
      }
 
     );

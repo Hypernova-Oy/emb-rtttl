@@ -24,6 +24,7 @@ use Modern::Perl;
 
 use Time::HiRes;
 use File::Slurp;
+use Proc::PID::File;
 
 use RTTTL::XS;
 
@@ -38,9 +39,37 @@ sub new {
     $self->{pin} = $params->{pin} or die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.";
     $self->{dir} = $params->{dir} or die "You must give parameter 'dir' to tell which directory we look for the rtttl-songs.";
 
-    RTTTL::XS::init($self->{pin});
+    bless $self, $class;
+    $self->_checkPid();
 
-    return bless $self, $class;
+    RTTTL::XS::init($self->{pin});
+    return $self;
+}
+
+=head2 _checkPid
+
+Checks if a RTTTL::Player is already playing in the given pin.
+If a RTTTL::PLayer is using the pin, the existing play is killed and this
+play is started.
+
+=cut
+
+sub _checkPid {
+    my ($self) = @_;
+
+    $self->{pid} = Proc::PID::File->new({name => _makePidFileName($self->{pin})});
+    _killExistingPlayer($self->{pid}) if $self->{pid}->alive();
+    $self->{pid}->touch();
+}
+
+sub _killExistingPlayer {
+    my ($pid) = @_;
+    kill 'KILL', $pid->read();
+}
+
+sub _makePidFileName {
+    my ($pin) = @_;
+    return __PACKAGE__.'-'.$pin;
 }
 
 sub getSongs {
@@ -59,7 +88,7 @@ sub playSong {
         $songFile .= '.rtttl';
     }
 
-    my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile);
+    my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile, binmode => 'utf8');
     RTTTL::XS::play_rtttl($self->{pin}, $rtttlCode);
     return 1;
 }
