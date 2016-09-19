@@ -12,11 +12,17 @@
             state=directory
 
     - name: Install configuration files to system
-      template: src={{emb_rtttl.template_dir}}/emb-rtttl/config \
+      template: src={{emb_rtttl.template_dir}}{{emb_rtttl.conf_dir}}/config \
                 dest={{emb_rtttl.conf_dir}}/config \
                 mode=0644 \
                 owner=root \
                 group=root
+
+    - name: Install crontab-scheduled plays to system
+      cron: name="autoplay tunes" \
+            minute="5" \
+            hour="9,13,17,21" \
+            job="rtttl-player -p 1 -o random"
 
     - name: Install debian packages
       apt: name=libproc-pid-file-perl,libconfig-simple-perl state=present
