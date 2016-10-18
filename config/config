@@ -4,3 +4,6 @@
 
 #From which directory to look for ringtones?
 dir=/var/local/rtttl
+
+#Which wiringPi pin to use for playback?
+pin=1

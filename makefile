@@ -43,8 +43,12 @@ configure:
 	mkdir -p $(systemConfigBaseDir)/$(programName)
 	cp config/config $(systemConfigBaseDir)/$(programName)/config
 
+	mkdir -p /var/local/rtttl
+	cp rtttl/* /var/local/rtttl/
+
 unconfigure:
 	rm -r $(systemConfigBaseDir)/$(programName) || $(RC)
+	rm -r /var/local/rtttl
 
 link: compile
 	cp $(pLib)/$(pPackage)/XS.so $(systemCDir)/XS.so
