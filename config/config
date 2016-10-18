@@ -3,4 +3,4 @@
 ##  $app_dir/ansible/playbooks/install.yml
 
 #From which directory to look for ringtones?
-dir={{emb_rtttl.app_dir}}/rtttl
+dir=/var/local/rtttl
