@@ -1,4 +1,6 @@
-use Modern::Perl;
+use strict;
+use warnings;
+
 use Module::Build;
 
 
@@ -10,7 +12,6 @@ my $build = Module::Build->new
      dist_abstract => 'A piezoelectric RTTTL-Player',
 
      build_requires => {
-	 'Modern::Perl' => '1',
      },
 
      requires => {
