@@ -17,6 +17,8 @@ RC      := test $$? -lt 100
 build: compile
 
 install: build link configure
+	./Build installdeps
+	./Build install
 
 compile:
 	##BUILD Perl XS madness using handy dandy swig <3
@@ -36,7 +38,11 @@ compile:
 
 	rm -r $(cBuildDir)
 
-test: compile
+	#Build Perl modules
+	perl Build.PL
+	./Build
+
+test:
 	prove -Ilib -Ilib/$(pPackage) t/*.t
 
 configure:
@@ -58,6 +64,7 @@ unlink:
 
 clean:
 	rm $(pLib)/$(pPackage)/XS.so || $(RC)
+	./Build realclean
 
 uninstall: unlink unconfigure clean
 
