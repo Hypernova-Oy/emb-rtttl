@@ -4,6 +4,7 @@ pLib=./lib
 pPackage=RTTTL
 systemCDir=/usr/lib
 systemConfigBaseDir=/etc
+systemPath=/usr/local/bin
 programName=emb-rtttl
 
 
@@ -16,7 +17,7 @@ RC      := test $$? -lt 100
 
 build: compile
 
-install: build link configure
+install: build link configure scriptsLink
 	./Build installdeps
 	./Build install
 
@@ -62,9 +63,15 @@ link: compile
 unlink:
 	rm $(systemCDir)/XS.so || $(RC)
 
+scriptsLink:
+        cp scripts/rtttl-player $(systemPath)/
+
+scriptsUnlink:
+        rm $(systemPath)/rtttl-player
+
 clean:
 	rm $(pLib)/$(pPackage)/XS.so || $(RC)
 	./Build realclean
 
-uninstall: unlink unconfigure clean
+uninstall: unlink unconfigure scriptsUnlink clean
 
