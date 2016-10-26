@@ -3,9 +3,10 @@ cLib=./clib
 pLib=./lib
 pPackage=RTTTL
 systemCDir=/usr/lib
-systemConfigBaseDir=/etc
-systemPath=/usr/local/bin
 programName=emb-rtttl
+confDir=etc/$(programName)
+systemPath=/usr/local/bin
+cronDir=etc/cron.d
 
 
 gccWiringPiDeps=-lwiringPi -lpthread
@@ -16,6 +17,8 @@ RC      := test $$? -lt 100
 
 
 build: compile
+
+restart:
 
 install: build link configure scriptsLink
 	./Build installdeps
@@ -47,15 +50,18 @@ test:
 	prove -Ilib -Ilib/$(pPackage) t/*.t
 
 configure:
-	mkdir -p $(systemConfigBaseDir)/$(programName)
-	cp config/config $(systemConfigBaseDir)/$(programName)/config
+	mkdir -p /$(confDir)
+	cp $(confDir)/config /$(confDir)/config
 
 	mkdir -p /var/local/rtttl
 	cp rtttl/* /var/local/rtttl/
 
+	cp $(cronDir)/$(programName) /$(cronDir)/$(programName)
+
 unconfigure:
-	rm -r $(systemConfigBaseDir)/$(programName) || $(RC)
+	rm -r /$(confDir) || $(RC)
 	rm -r /var/local/rtttl
+	rm /$(cronDir)/$(programName)
 
 link: compile
 	cp $(pLib)/$(pPackage)/XS.so $(systemCDir)/XS.so
@@ -64,10 +70,10 @@ unlink:
 	rm $(systemCDir)/XS.so || $(RC)
 
 scriptsLink:
-        cp scripts/rtttl-player $(systemPath)/
+	cp scripts/rtttl-player $(systemPath)/
 
 scriptsUnlink:
-        rm $(systemPath)/rtttl-player
+	rm $(systemPath)/rtttl-player
 
 clean:
 	rm $(pLib)/$(pPackage)/XS.so || $(RC)
