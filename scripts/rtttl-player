@@ -64,7 +64,7 @@ unless ($operation =~ /(^list$)|(^song-\w+)|(^random$)/) {
 }
 
 
-my $player = RTTTL::Player->new({pin => $pin, dir => $dir});
+my $player = RTTTL::Player->new({pin => $pin, dir => $dir, cverbose => $verbose});
 
 if ($operation eq 'list') {
   print(join("\n",@{$player->getSongs()}));

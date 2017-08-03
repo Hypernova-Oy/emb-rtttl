@@ -2,5 +2,8 @@
 dir=/var/local/rtttl
 
 #Which wiringPi pin to use for playback?
-pin=1
+pin=7
+
+#Print rtttl-player c-library debug to STDOUT, 0 or 1
+cverbose=0
 

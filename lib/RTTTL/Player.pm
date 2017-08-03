@@ -36,16 +36,18 @@ sub new {
     my ($class, $params) = @_;
     my $self = _loadConfig();
 
-    $self->{pin} = $params->{pin} || $self->{'default.pin'};
-    $self->{dir} = $params->{dir} || $self->{'default.dir'};
+    $self->{pin}      = $params->{pin}      || $self->{'default.pin'};
+    $self->{dir}      = $params->{dir}      || $self->{'default.dir'};
+    $self->{cverbose} = $params->{cverbose} || $self->{'default.cverbose'};
 
     die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.\n$confOrParamHelperText" unless ($self->{pin});
     die "You must give parameter 'dir' to tell in which directory we look for the rtttl-songs.\n$confOrParamHelperText" unless ($self->{dir});
+    die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play.\n$confOrParamHelperText" unless ($self->{dir});
 
     bless $self, $class;
     $self->_checkPid();
 
-    RTTTL::XS::init($self->{pin});
+    RTTTL::XS::init($self->{pin}, $self->{cverbose});
     return $self;
 }
 

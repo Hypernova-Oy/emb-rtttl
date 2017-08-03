@@ -18,18 +18,23 @@ int notes[] = { 0,
 char *song = "nyancat:d=4,o=5,b=90:16d#6,16e6,8f#6,8b6,16d#6,16e6,16f#6,16b6,16c#7,16d#7,16c#7,16a#6,8b6,8f#6,16d#6,16e6,8f#6,8b6,16c#7,16a#6,16b6,16c#7,16e7,16d#7,16e7,16c#7,8f#6,8g#6,16d#6,16d#6,16p,16b,16d6,16c#6,16b,16p,8b,8c#6,8d6,16d6,16c#6,16b,16c#6,16d#6,16f#6,16g#6,16d#6,16f#6,16c#6,16d#6,16b,16c#6,16b,8d#6,8f#6,16g#6,16d#6,16f#6,16c#6,16d#6,16b,16d6,16d#6,16d6,16c#6,16b,16c#6,8d6,16b,16c#6,16d#6,16f#6,16c#6,16d#6,16c#6,16b,8c#6,8b,8c#6,8f#6,8g#6,16d#6,16d#6,16p,16b,16d6,16c#6,16b,16p,8b,8c#6,8d6,16d6,16c#6,16b,16c#6,16d#6,16f#6,16g#6,16d#6,16f#6,16c#6,16d#6,16b,16c#6,16b,8d#6,8f#6,16g#6,16d#6,16f#6,16c#6,16d#6,16b,16d6,16d#6,16d6,16c#6,16b,16c#6,8d6,16b,16c#6,16d#6,16f#6,16c#6,16d#6,16c#6,16b,8c#6,8b,8c#6,8b,16f#,16g#,8b,16f#,16g#,16b,16c#6,16d#6,16b,16e6,16d#6,16e6,16f#6,8b,8b,16f#,16g#,16b,16f#,16e6,16d#6,16c#6,16b,16f#,16d#,16e,16f#,8b,16f#,16g#,8b,16f#,16g#,16b,16b,16c#6,16d#6,16b,16f#,16g#,16f#,8b,16b,16a#,16b,16f#,16g#,16b,16e6,16d#6,16e6,16f#6,8b,8a#,8b,16f#,16g#,8b,16f#,16g#,16b,16c#6,16d#6,16b,16e6,16d#6,16e6,16f#6,8b,8b,16f#,16g#,16b,16f#,16e6,16d#6,16c#6,16b,16f#,16d#,16e,16f#,8b,16f#,16g#,8b,16f#,16g#,16b,16b,16c#6,16d#6,16b,16f#,16g#,16f#,8b,16b,16a#,16b,16f#,16g#,16b,16e6,16d#6,16e6,16f#6,8b,8c#6";
 
 int defaultTonePin = 1; //Default pin
+int verbose = 0;
 
 #define isdigit(n) (n >= '0' && n <= '9')
 
-void init(int pin)
+void init(int pin, int _verbose)
 {
-        wiringPiSetup();
-        softToneCreate(pin);
+    verbose = _verbose;
+    wiringPiSetup();
+    softToneCreate(pin);
 }
 
 void play_tone(int pin, int tone, int duration)
 {
-    //printf("play_tone(%i, %i, %i)\n",pin, tone, duration);
+    if (verbose == 1)
+    {
+        printf("play_tone(%i, %i, %i)\n",pin, tone, duration);
+    }
     softToneWrite(pin, tone);
     delay(duration);
     softToneWrite(pin, 0);
@@ -194,7 +199,7 @@ void play_rtttl(int pin, char *p)
 
 int main(int argc,char const *argv[])
 {
-        init(defaultTonePin);
+        init(defaultTonePin, verbose);
         play_rtttl(defaultTonePin, song);
         return 0;
 }
