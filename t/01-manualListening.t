@@ -10,7 +10,7 @@ print "Connect the beeper to wiringPi pin 7\n";
 print "\n\n";
 print "Test begins...\n";
 
-my $pin = 7;
+my $pin = 1;
 my $verbose = 1;
 
 ok(1, "Initializing the wiringPi library\n");
