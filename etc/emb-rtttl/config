@@ -1,9 +1,15 @@
 #From which directory to look for ringtones?
 dir=/var/local/rtttl
 
-#Which wiringPi pin to use for playback?
-pin=1
+#Which gpio pin to use for playback?
+pin=18
 
-#Print rtttl-player c-library debug to STDOUT, 0 or 1
-cverbose=0
+#rtttl-player console logging verbosity        
+# FATAL 0
+# ERROR 1
+# WARN  2
+# INFO  3
+# DEBUG 4
+# TRACE 5
+cverbose=3
 

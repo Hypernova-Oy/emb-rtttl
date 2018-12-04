@@ -32,10 +32,14 @@ compile:
 	\
 	swig -perl5 XS.i; \
 	\
+        gcc -c -D NOMAIN logger.c rtttl_parser.c; \
 	gcc -c `perl -MConfig -e 'print join(" ", @Config{qw(ccflags optimize cccdlflags)}, \
-	       	"-I$$Config{archlib}/CORE")'` XS.c XS_wrap.c $(gccWiringPiDeps); \
+		"-I$$Config{archlib}/CORE")'` \
+		XS.c XS_wrap.c $(gccWiringPiDeps); \
 	\
-	gcc -shared `perl -MConfig -e 'print $$Config{lddlflags}'` XS.o XS_wrap.o -o XS.so $(gccWiringPiDeps);
+	gcc -shared `perl -MConfig -e 'print $$Config{lddlflags}'` \
+		logger.o rtttl_parser.o XS.o XS_wrap.o -o XS.so $(gccWiringPiDeps); \
+
 
 	cp $(cBuildDir)/XS.pm $(pLib)/$(pPackage)/
 	cp $(cBuildDir)/XS.so $(pLib)/$(pPackage)/

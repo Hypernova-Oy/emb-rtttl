@@ -86,9 +86,8 @@ sub getSongs {
     my ($self) = @_;
 
     opendir(D, $self->{dir}) || die "Can't open directory ".$self->{dir}.": $!\n";
-    my @list = readdir(D);
-    pop @list; pop @list;
-    @list = sort @list;
+    my @list = grep { $_ !~ /^\./ && -f "$self->{dir}/$_" } readdir(D);
+    @list = sort @list; # . and .. no longer are found atthe top of the array
     closedir(D);
     return \@list;
 }
@@ -100,7 +99,7 @@ sub playSong {
         $songFile .= '.rtttl';
     }
 
-    my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile, binmode => 'utf8');
+    my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile, binmode => ':encoding(UTF-8)');
     RTTTL::XS::play_rtttl($self->{pin}, $rtttlCode);
     return 1;
 }
