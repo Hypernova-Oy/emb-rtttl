@@ -42,7 +42,7 @@ sub new {
 
     die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.\n$confOrParamHelperText" unless ($self->{pin});
     die "You must give parameter 'dir' to tell in which directory we look for the rtttl-songs.\n$confOrParamHelperText" unless ($self->{dir});
-    die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play.\n$confOrParamHelperText" unless ($self->{dir});
+    die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play. The bigger the number the more verbosity. \n$confOrParamHelperText" unless ($self->{dir});
 
     bless $self, $class;
     $self->_checkPid();
@@ -74,7 +74,7 @@ sub _checkPid {
 
 sub _killExistingPlayer {
     my ($pid) = @_;
-    kill 'KILL', $pid->read();
+    kill 'INT', $pid->read();
 }
 
 sub _makePidFileName {
@@ -100,7 +100,7 @@ sub playSong {
     }
 
     my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile, binmode => ':encoding(UTF-8)');
-    RTTTL::XS::play_rtttl($self->{pin}, $rtttlCode);
+    RTTTL::XS::play_rtttl($rtttlCode);
     return 1;
 }
 

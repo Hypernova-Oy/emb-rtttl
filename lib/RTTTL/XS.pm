@@ -52,7 +52,6 @@ package RTTTL::XS;
 *play_tone = *RTTTL::XSc::play_tone;
 *play_rtttl = *RTTTL::XSc::play_rtttl;
 *init = *RTTTL::XSc::init;
-*init_soft = *RTTTL::XSc::init_soft;
 
 # ------- VARIABLE STUBS --------
 

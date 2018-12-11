@@ -7,7 +7,7 @@ use Proc::PID::File;
 
 use RTTTL::Player;
 
-my $pin = 1;
+my $pin = 18;
 my $rtttlPlayerName = 'rtttl-player';
 
 subtest "Check pid", \&checkPid;

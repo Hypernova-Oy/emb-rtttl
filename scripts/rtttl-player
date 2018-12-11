@@ -43,7 +43,7 @@ You can configure some of these options in /etc/emb-rtttl/config
 
   -d --dir                Which directory to use as the song base?
 
-  -p --pin                Which wiringPi pin to use for playback?
+  -p --pin                Which GPIO pin to use for playback?
 
 EXAMPLES:
 

@@ -5,7 +5,7 @@ use Test::More;
 
 use RTTTL::Player;
 
-my $player = RTTTL::Player->new({pin => 1, dir => './rtttl'});
+my $player = RTTTL::Player->new({pin => 18, dir => './rtttl'});
 
 subtest "Listing RTTTLs", \&listRTTTLs;
 sub listRTTTLs {

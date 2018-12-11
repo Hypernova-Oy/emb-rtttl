@@ -25,9 +25,9 @@ void init_common(short loglevel) {
   wiringPiSetupGpio();
 }
 
-void init(int pin, short loglevel) {
+void init_hard() {
   hardware = 1;
-  init_common(loglevel);
+
   pinMode(pwmpin, PWM_OUTPUT);
   pwmSetMode(PWM_MODE_MS);
   pwmSetClock(16); // Nominal 1.2 MHz. Fix the hard-coded value 1.2e6 in code if you change this.
@@ -42,13 +42,20 @@ void init(int pin, short loglevel) {
   sigaction(SIGHUP, &psa, NULL);  //          hangup - called when parent process exits
 }
 
-void init_soft(int pin, short loglevel) {
+void init_soft() {
   hardware = 0;
-  init_common(loglevel);
   softToneCreate(pwmpin);
 }
 
-void play_tone(int pin, int frequency, int duration) {
+void init(int pin, short loglevel) {
+  if (pin > -1) pwmpin = pin;
+  init_common(loglevel);
+
+  if (pwmpin = 18) return init_hard();
+  return init_soft();
+}
+
+void play_tone(int frequency, int duration) {
   if (hardware == 1) {
     if (frequency == 0) {
       pwmWrite(pwmpin, 0); //Duty cycle is not at 0%
@@ -77,7 +84,7 @@ void play_tone(int pin, int frequency, int duration) {
   }
 }
 
-void play_rtttl(int pin, char *rtttl) {
+void play_rtttl(char *rtttl) {
   struct Song song = parse_rtttl(rtttl);
 
   snprintf(str, 121, "play_rtttl(song=%s)", song.name); logp(INFO, str);
@@ -85,10 +92,10 @@ void play_rtttl(int pin, char *rtttl) {
   int i = 0;
   while (i < song.tonesCount) {
     struct Tone tone = song.tones[i];
-    play_tone(pwmpin, tone.frequency, tone.duration);
+    play_tone(tone.frequency, tone.duration);
     i++;
   }
-  play_tone(pwmpin, 0, 1); // Shut down the piezo
+  play_tone(0, 1); // Shut down the piezo
 }
 
 
@@ -105,7 +112,7 @@ char *song = "Axelf:d=8,o=5,b=160:4f#,a.,f#,16f#,a#,f#,e,4f#,c6.,f#,16f#,d6,c#6,
 int main(int argc,char const *argv[])
 {
   init(pwmpin, TRACE);
-  play_rtttl(pwmpin, song);
+  play_rtttl(song);
   return 0;
 }
 #endif
