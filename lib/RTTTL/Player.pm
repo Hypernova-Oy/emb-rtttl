@@ -85,22 +85,18 @@ sub _makePidFileName {
 sub getSongs {
     my ($self) = @_;
 
-    opendir(D, $self->{dir}) || die "Can't open directory ".$self->{dir}.": $!\n";
-    my @list = grep { $_ !~ /^\./ && -f "$self->{dir}/$_" } readdir(D);
-    @list = sort @list; # . and .. no longer are found atthe top of the array
-    closedir(D);
+    my @list = do $self->{dir}.'/songs.pl';
+    $DB::single=1;
     return \@list;
 }
 
 sub playSong {
-    my ($self, $songFile) = @_;
+    my ($self, $name) = @_;
 
-    unless ($songFile =~ /.rtttl$/) {
-        $songFile .= '.rtttl';
-    }
-
-    my $rtttlCode = File::Slurp::read_file($self->{dir}.'/'.$songFile, binmode => ':encoding(UTF-8)');
-    RTTTL::XS::play_rtttl($rtttlCode);
+    my $songs = $self->getSongs();
+    my @song = grep {$_ =~ /$name/} @$songs;
+    return 0 unless @song;
+    RTTTL::XS::play_rtttl($song[0]);
     return 1;
 }
 
@@ -108,7 +104,8 @@ sub playSongIndex {
     my ($self, $index) = @_;
 
     my $songs = $self->getSongs();
-    return $self->playSong($songs->[$index]);
+    RTTTL::XS::play_rtttl($songs->[$index]);
+    return 1;
 }
 
 

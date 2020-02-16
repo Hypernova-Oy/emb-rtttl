@@ -13,7 +13,7 @@ gccWiringPiDeps=-lwiringPi -lpthread
 
 
 #Macro to check the exit code of a make expression and possibly not fail on warnings
-RC      := test $$? -lt 100 
+RC      := test $$? -lt 100
 
 
 build: compile

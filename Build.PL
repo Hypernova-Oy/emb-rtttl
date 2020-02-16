@@ -17,7 +17,6 @@ my $build = Module::Build->new
      requires => {
         'Modern::Perl' => '1',
         'Time::HiRes' => '1.9',
-        'GPIO' => '0.01',
         'Proc::PID::File' => '1.00',
         'Config::Simple' => '1.00',
         'File::Slurp' => '9999.19',
