@@ -14,6 +14,7 @@ my $verbose = 0;
 my $operation;
 my $pin;
 my $dir;
+my $rtttl;
 
 GetOptions(
     'h|help'                      => \$help,
@@ -21,6 +22,7 @@ GetOptions(
     'p|pin:i'                     => \$pin,
     'd|dir:s'                     => \$dir,
     'o|operation:s'               => \$operation,
+    'r|rtttl:s'                   => \$rtttl,
 );
 
 my $usage = <<USAGE;
@@ -45,6 +47,9 @@ You can configure some of these options in /etc/emb-rtttl/config
 
   -p --pin                Which GPIO pin to use for playback?
 
+  -r --rtttl              rtttl-song/codes to play, eg.
+                          ToveriAccessDenied:d=4,o=4,b=100:32e,32d,32e,4c
+
 EXAMPLES:
 
   perl scripts/rtttl-player.pl -p 1 -d rtttl -o list
@@ -57,16 +62,19 @@ if ($help) {
   print $usage;
   exit 0;
 }
-unless ($operation =~ /(^list$)|(^song-\w+)|(^random$)/) {
+unless ($rtttl || $operation =~ /(^list$)|(^song-\w+)|(^random$)/) {
   print $usage."\n".
-        "You must define the --operation. Your --operation is '$operation'\n";
+        "You must define the --operation or --rtttl. Your --operation is '$operation'\n";
   exit 1;
 }
 
 
 my $player = RTTTL::Player->new({pin => $pin, dir => $dir, cverbose => $verbose});
 
-if ($operation eq 'list') {
+if ($rtttl) {
+  RTTTL::XS::play_rtttl($rtttl);
+}
+elsif ($operation eq 'list') {
   print(join("\n",@{$player->getSongs()}));
 }
 elsif ($operation eq 'random') {
