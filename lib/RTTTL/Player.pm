@@ -36,24 +36,61 @@ sub new {
     my ($class, $params) = @_;
     my $self = _loadConfig();
 
-    $self->{pin}      = $params->{pin}      || $self->{'default.pin'};
-    $self->{dir}      = $params->{dir}      || $self->{'default.dir'};
-    $self->{cverbose} = $params->{cverbose} || $self->{'default.cverbose'};
+    $self->{pin}      = $params->{pin}      || $self->{'default.pin'} || 18;
+    $self->{dir}      = $params->{dir}      || $self->{'default.dir'} || '/var/local/rtttl';
+    $self->{cverbose} = $params->{cverbose} || $self->{'default.cverbose'} || 3;
+    $self->{rundir}   = $params->{rundir}   || $self->{'default.rundir'} || '/var/run/emb-rtttl';
+    $self->{user}     = $params->{user}     || $self->{'default.user'} || 'pi';
+    $self->{group}    = $params->{group}    || $self->{'default.group'} || 'gpio';
 
     die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.\n$confOrParamHelperText" unless ($self->{pin});
     die "You must give parameter 'dir' to tell in which directory we look for the rtttl-songs.\n$confOrParamHelperText" unless ($self->{dir});
     die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play. The bigger the number the more verbosity. \n$confOrParamHelperText" unless ($self->{dir});
 
     bless $self, $class;
-    $self->_checkPid();
-
-    RTTTL::XS::init($self->{pin}, $self->{cverbose});
     return $self;
 }
 
 sub _loadConfig {
     my $c = Config::Simple->new($confFile)->vars() or die(Config::Simple->error());
     return $c;
+}
+
+sub init {
+    my ($self) = @_;
+    if (! $self->{_inited}) {
+        $self->{_inited} = 1;
+        $self->_checkPid();
+        RTTTL::XS::init($self->{pin}, $self->{cverbose});
+    }
+}
+
+sub dispatchOperation {
+    my ($self, $op) = @_;
+    if ($op eq 'list') {
+        print(join("\n",@{$self->getSongs()}));
+        print("\n");
+    }
+    elsif ($op eq 'random') {
+        $self->playRandomSong();
+    }
+    elsif ($op =~ /^rtttl-(.+)$/) {
+        $self->_playSong($1);
+    }
+    elsif ($op =~ /^song/) {
+        if ($op =~ /^song-(.+)$/) {
+            my $song = $1;
+            $self->playSong($song);
+        }
+        else {
+            die "Operation '$op' given but not prefixed with a song name?";
+        }
+    }
+    else {
+        die "Unknown operation '$op'";
+    }
+    print STDOUT ("OK: $op\r\n");
+    return $self;
 }
 
 =head2 _checkPid
@@ -67,7 +104,7 @@ play is started.
 sub _checkPid {
     my ($self) = @_;
 
-    $self->{pid} = Proc::PID::File->new({name => _makePidFileName($self->{pin})});
+    $self->{pid} = Proc::PID::File->new({dir => '/var/run/emb-rtttl', name => _makePidFileName($self->{pin})});
     _killExistingPlayer($self->{pid}) if $self->{pid}->alive();
     $self->{pid}->touch();
 }
@@ -86,8 +123,20 @@ sub getSongs {
     my ($self) = @_;
 
     my @list = do $self->{dir}.'/songs.pl';
-    $DB::single=1;
     return \@list;
+}
+
+sub playRandomSong {
+    my ($self, $maxLength) = @_;
+    $maxLength //= 100;
+    my $songs = $self->getSongs();
+
+    my $songIndex = int(rand(scalar(@$songs)));
+    while (length($songs->[$songIndex]) > $maxLength) {
+        $songIndex = int(rand(scalar(@$songs)));
+    }
+    $self->playSongIndex($songIndex);
+    return 1;
 }
 
 sub playSong {
@@ -96,7 +145,7 @@ sub playSong {
     my $songs = $self->getSongs();
     my @song = grep {$_ =~ /$name/} @$songs;
     return 0 unless @song;
-    RTTTL::XS::play_rtttl($song[0]);
+    $self->_playSong($song[0]);
     return 1;
 }
 
@@ -104,11 +153,15 @@ sub playSongIndex {
     my ($self, $index) = @_;
 
     my $songs = $self->getSongs();
-    RTTTL::XS::play_rtttl($songs->[$index]);
+    $self->_playSong($songs->[$index]);
     return 1;
 }
 
-
+sub _playSong {
+    my ($self, $song) = @_;
+    $self->init(); # Do the hardware init as late as possible to allow other than play operations in unprivileged mode.
+    RTTTL::XS::play_rtttl($song);
+}
 
 
 1;

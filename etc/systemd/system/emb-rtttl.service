@@ -1,0 +1,15 @@
+[Unit]
+Description=emb-rtttl system daemon
+
+[Service]
+Type=idle
+User=root
+ExecStart=/usr/local/bin/rtttl-player --daemon
+
+RestartSec=5s
+Restart=always
+
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

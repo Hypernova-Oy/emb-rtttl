@@ -5,6 +5,8 @@ pPackage=RTTTL
 systemCDir=/usr/lib
 programName=emb-rtttl
 confDir=etc/$(programName)
+runDir=var/run/$(programName)
+systemdServiceDir=etc/systemd/system
 systemPath=/usr/local/bin
 cronDir=etc/cron.d
 
@@ -55,17 +57,23 @@ test:
 
 configure:
 	mkdir -p /$(confDir)
-	cp $(confDir)/config /$(confDir)/config
+	(test ! -f /$(confDir)/config && cp $(confDir)/config /$(confDir)/config) || $(RC)
 
 	mkdir -p /var/local/rtttl
 	cp rtttl/* /var/local/rtttl/
 
-	cp $(cronDir)/$(programName) /$(cronDir)/$(programName)
+	mkdir -p /$(runDir)
+
+	(test ! -f /$(cronDir)/$(programName) && cp $(cronDir)/$(programName) /$(cronDir)/$(programName)) || $(RC)
+
+	cp $(systemdServiceDir)/$(programName).service /$(systemdServiceDir)/
 
 unconfigure:
 	rm -r /$(confDir) || $(RC)
-	rm -r /var/local/rtttl
-	rm /$(cronDir)/$(programName)
+	rm -r /var/local/rtttl || $(RC)
+	rm -r /$(runDir) || $(RC)
+	rm /$(cronDir)/$(programName) || $(RC)
+	rm /$(systemdServiceDir)/$(programName).service || $(RC)
 
 link: compile
 	cp $(pLib)/$(pPackage)/XS.so $(systemCDir)/XS.so
