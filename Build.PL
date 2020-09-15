@@ -15,6 +15,7 @@ my $build = Module::Build->new
      },
 
      requires => {
+        'Net::Server' => '2',
         'Modern::Perl' => '1',
         'Time::HiRes' => '1.9',
         'Proc::PID::File' => '1.00',
