@@ -67,6 +67,8 @@ configure:
 	(test ! -f /$(cronDir)/$(programName) && cp $(cronDir)/$(programName) /$(cronDir)/$(programName)) || $(RC)
 
 	cp $(systemdServiceDir)/$(programName).service /$(systemdServiceDir)/
+	systemctl enable emb-rtttl
+	systemctl start emb-rtttl
 
 unconfigure:
 	rm -r /$(confDir) || $(RC)
@@ -74,6 +76,8 @@ unconfigure:
 	rm -r /$(runDir) || $(RC)
 	rm /$(cronDir)/$(programName) || $(RC)
 	rm /$(systemdServiceDir)/$(programName).service || $(RC)
+	systemctl disable emb-rtttl
+	systemctl stop emb-rtttl
 
 link: compile
 	cp $(pLib)/$(pPackage)/XS.so $(systemCDir)/XS.so
