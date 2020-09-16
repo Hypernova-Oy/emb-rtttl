@@ -5,7 +5,6 @@ pPackage=RTTTL
 systemCDir=/usr/lib
 programName=emb-rtttl
 confDir=etc/$(programName)
-runDir=var/run/$(programName)
 systemdServiceDir=etc/systemd/system
 systemPath=/usr/local/bin
 cronDir=etc/cron.d
@@ -62,8 +61,6 @@ configure:
 	mkdir -p /var/local/rtttl
 	cp rtttl/* /var/local/rtttl/
 
-	mkdir -p /$(runDir)
-
 	(test ! -f /$(cronDir)/$(programName) && cp $(cronDir)/$(programName) /$(cronDir)/$(programName)) || $(RC)
 
 	cp $(systemdServiceDir)/$(programName).service /$(systemdServiceDir)/
@@ -73,7 +70,6 @@ configure:
 unconfigure:
 	rm -r /$(confDir) || $(RC)
 	rm -r /var/local/rtttl || $(RC)
-	rm -r /$(runDir) || $(RC)
 	rm /$(cronDir)/$(programName) || $(RC)
 	rm /$(systemdServiceDir)/$(programName).service || $(RC)
 	systemctl disable emb-rtttl

@@ -2,10 +2,14 @@
 Description=emb-rtttl system daemon
 
 [Service]
-Type=idle
+Type=simple
 User=root
+
+ExecStartPre=/bin/mkdir -p /var/run/emb-rtttl
+ExecStartPre=/bin/chown -R pi:gpio /var/run/emb-rtttl
 ExecStart=/usr/local/bin/rtttl-player --daemon
 
+PIDFile=/var/run/emb-rtttl/pid
 RestartSec=5s
 Restart=always
 
