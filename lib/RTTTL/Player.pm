@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# Copyright (C) 2021 Hypernova Oy
 # Copyright (C) 2016 Koha-Suomi
 #
 # This file is part of emb-buzzer.
@@ -48,6 +49,8 @@ sub new {
     die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play. The bigger the number the more verbosity. \n$confOrParamHelperText" unless ($self->{dir});
 
     bless $self, $class;
+    $self->{songs} = undef; # {} lazy load songs here
+    $self->{songNames} = undef; # []
     return $self;
 }
 
@@ -68,7 +71,8 @@ sub init {
 sub dispatchOperation {
     my ($self, $op) = @_;
     if ($op eq 'list') {
-        print(join("\n",@{$self->getSongs()}));
+        my ($songs, $names) = $self->getSongs();
+        print(join("\n",@$names));
         print("\n");
     }
     elsif ($op eq 'random') {
@@ -122,18 +126,23 @@ sub _makePidFileName {
 sub getSongs {
     my ($self) = @_;
 
-    my @list = do $self->{dir}.'/songs.pl';
-    return \@list;
+    unless ($self->{songs}) {
+        my $list = do $self->{dir}.'/songs.pl';
+        $self->{songs} = $list;
+        my @names = sort(keys(%$list));
+        $self->{songNames} = \@names;
+    }
+    return ($self->{songs}, $self->{songNames});
 }
 
 sub playRandomSong {
     my ($self, $maxLength) = @_;
-    $maxLength //= 100;
-    my $songs = $self->getSongs();
+    $maxLength //= 20000;
+    my ($songs, $names) = $self->getSongs();
 
-    my $songIndex = int(rand(scalar(@$songs)));
-    while (length($songs->[$songIndex]) > $maxLength) {
-        $songIndex = int(rand(scalar(@$songs)));
+    my $songIndex = int(rand(scalar(@$names)));
+    while (length($songs->{$names->[$songIndex]}) > $maxLength) {
+        $songIndex = int(rand(scalar(@$names)));
     }
     $self->playSongIndex($songIndex);
     return 1;
@@ -142,18 +151,18 @@ sub playRandomSong {
 sub playSong {
     my ($self, $name) = @_;
 
-    my $songs = $self->getSongs();
-    my @song = grep {$_ =~ /$name/} @$songs;
-    return 0 unless @song;
-    $self->_playSong($song[0]);
+    my ($songs, $names) = $self->getSongs();
+    my $song = $songs->{$name};
+    return 0 unless $song;
+    $self->_playSong($song);
     return 1;
 }
 
 sub playSongIndex {
     my ($self, $index) = @_;
 
-    my $songs = $self->getSongs();
-    $self->_playSong($songs->[$index]);
+    my ($songs, $names) = $self->getSongs();
+    $self->_playSong($songs->{$names->[$index]});
     return 1;
 }
 
