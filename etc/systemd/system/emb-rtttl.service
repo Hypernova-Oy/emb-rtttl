@@ -5,11 +5,11 @@ Description=emb-rtttl system daemon
 Type=simple
 User=root
 
-ExecStartPre=/bin/mkdir -p /var/run/emb-rtttl
-ExecStartPre=/bin/chown -R pi:gpio /var/run/emb-rtttl
-ExecStart=/usr/local/bin/rtttl-player --daemon
+ExecStartPre=/bin/mkdir -p /run/emb-rtttl
+ExecStartPre=/bin/chown -R pi:gpio /run/emb-rtttl
+ExecStart=/usr/local/bin/rtttl-player --daemon --rundir="/run/emb-rtttl/"
 
-PIDFile=/var/run/emb-rtttl/pid
+PIDFile=/run/emb-rtttl/pid
 RestartSec=5s
 Restart=always
 

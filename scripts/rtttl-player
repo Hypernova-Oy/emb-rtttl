@@ -14,25 +14,21 @@ use RTTTL::Player;
 my $help;
 my $verbose = 0;
 my $operation = '';
-my $pin;
-my $dir;
 my $rtttl;
 my $daemon;
-my $rundir;
-my $user;
-my $group;
+my %params = ();
 
 GetOptions(
     'h|help'                      => \$help,
-    'v|verbose:i'                 => \$verbose,
-    'p|pin:i'                     => \$pin,
-    'd|dir:s'                     => \$dir,
+    'v|verbose:i'                 => \$params{cverbose},
+    'p|pin:i'                     => \$params{pin},
+    'd|dir:s'                     => \$params{dir},
     'o|operation:s'               => \$operation,
     'r|rtttl:s'                   => \$rtttl,
     'daemon'                      => \$daemon,
-    'rundir:s'                    => \$rundir,
-    'user:s'                      => \$user,
-    'group:s'                     => \$group,
+    'rundir:s'                    => \$params{rundir},
+    'user:s'                      => \$params{user},
+    'group:s'                     => \$params{group},
 );
 
 my $usage = <<USAGE;
@@ -49,7 +45,7 @@ You can configure some of these options in /etc/emb-rtttl/config
 
   -o --operation
                   list    list all songs in the directory
-                  song    play the target
+                  song    play the target song, or all songs matching the given regexp
                   random  play a random song
                   rtttl   Same as -r --rtttl
 
@@ -60,8 +56,8 @@ You can configure some of these options in /etc/emb-rtttl/config
   -r --rtttl              rtttl-song/codes to play, eg.
                           ToveriAccessDenied:d=4,o=4,b=100:32e,32d,32e,4c
 
-  --daemon                Starts a daemon process listening at /var/run/emb-rtttl/sock
-  --rundir PATH           Where the daemon socket and pid are placed, defaults to /var/run/emb-rtttl/[pid|sock]
+  --daemon                Starts a daemon process listening at /run/emb-rtttl/sock
+  --rundir PATH           Where the daemon socket and pid are placed, defaults to ./
 
   --user NAME             Defaults to pi
   --group NAME            Defaults to gpio
@@ -86,7 +82,7 @@ unless (defined($daemon) || $rtttl || $operation =~ /(^list$)|(^song-\w+)|(^rand
 }
 
 
-my $player = RTTTL::Player->new({pin => $pin, dir => $dir, cverbose => $verbose, user => $user, group => $group});
+my $player = RTTTL::Player->new(\%params);
 
 if ($rtttl) {
   $player->_playSong($rtttl);

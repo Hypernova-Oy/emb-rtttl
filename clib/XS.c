@@ -15,6 +15,7 @@ char str[121];
 short hardware = 0; // Is hardware pwm in use? Otherwise uses the software tone library
 
 void rtttl_graceful_terminate(int signo){
+  snprintf(str, 121, "exiting via signal '%i'", signo); logp(DEBUG, str);
   pwmWrite(pwmpin, 0);
   pinMode(pwmpin, OUTPUT); // Disable the hardware pwm
   exit(0);
@@ -112,7 +113,11 @@ char *song = "Axelf:d=8,o=5,b=160:4f#,a.,f#,16f#,a#,f#,e,4f#,c6.,f#,16f#,d6,c#6,
 int main(int argc,char const *argv[])
 {
   init(pwmpin, TRACE);
-  play_rtttl(song);
+  if (argv[1] != 0) {
+    play_rtttl(argv[1]);
+  } else {
+    play_rtttl(song);
+  }
   return 0;
 }
 #endif

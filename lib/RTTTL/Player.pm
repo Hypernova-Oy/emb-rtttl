@@ -23,6 +23,7 @@ our $VERSION = "0.01";
 
 use Modern::Perl;
 
+use Data::Dumper;
 use Time::HiRes;
 use File::Slurp;
 use Proc::PID::File;
@@ -40,7 +41,7 @@ sub new {
     $self->{pin}      = $params->{pin}      || $self->{'default.pin'} || 18;
     $self->{dir}      = $params->{dir}      || $self->{'default.dir'} || '/var/local/rtttl';
     $self->{cverbose} = $params->{cverbose} || $self->{'default.cverbose'} || 3;
-    $self->{rundir}   = $params->{rundir}   || $self->{'default.rundir'} || '/var/run/emb-rtttl';
+    $self->{rundir}   = $params->{rundir}   || $self->{'default.rundir'} || '.';
     $self->{user}     = $params->{user}     || $self->{'default.user'} || 'pi';
     $self->{group}    = $params->{group}    || $self->{'default.group'} || 'gpio';
 
@@ -51,6 +52,10 @@ sub new {
     bless $self, $class;
     $self->{songs} = undef; # {} lazy load songs here
     $self->{songNames} = undef; # []
+
+    if ($self->{cverbose} >= 4) {
+        warn(Data::Dumper::Dumper($self)."\n");
+    }
     return $self;
 }
 
@@ -108,13 +113,14 @@ play is started.
 sub _checkPid {
     my ($self) = @_;
 
-    $self->{pid} = Proc::PID::File->new({dir => '/var/run/emb-rtttl', name => _makePidFileName($self->{pin})});
+    $self->{pid} = Proc::PID::File->new({dir => $self->{rundir}, name => _makePidFileName($self->{pin})});
     _killExistingPlayer($self->{pid}) if $self->{pid}->alive();
     $self->{pid}->touch();
 }
 
 sub _killExistingPlayer {
     my ($pid) = @_;
+    warn("Killing existing PID='".$pid->{path}."'");
     kill 'INT', $pid->read();
 }
 
@@ -144,32 +150,35 @@ sub playRandomSong {
     while (length($songs->{$names->[$songIndex]}) > $maxLength) {
         $songIndex = int(rand(scalar(@$names)));
     }
-    $self->playSongIndex($songIndex);
-    return 1;
+    return $self->playSongIndex($songIndex);
 }
 
 sub playSong {
     my ($self, $name) = @_;
 
     my ($songs, $names) = $self->getSongs();
-    my $song = $songs->{$name};
-    return 0 unless $song;
-    $self->_playSong($song);
-    return 1;
+    my @matches = grep { $_ =~ m/$name/ } @$names;
+    for my $songName (@matches) {
+        $self->_playSong($songs->{$songName});
+    }
+    return 1 if @matches;
+    return 0;
 }
 
 sub playSongIndex {
     my ($self, $index) = @_;
 
     my ($songs, $names) = $self->getSongs();
-    $self->_playSong($songs->{$names->[$index]});
+    my $song = $songs->{$names->[$index]};
+    return 0 unless $song;
+    $self->_playSong($song);
     return 1;
 }
 
 sub _playSong {
     my ($self, $song) = @_;
     $self->init(); # Do the hardware init as late as possible to allow other than play operations in unprivileged mode.
-    RTTTL::XS::play_rtttl($song);
+    return RTTTL::XS::play_rtttl($song);
 }
 
 
