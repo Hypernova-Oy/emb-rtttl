@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2020 Hypernova Oy
+# Copyright 2021 Hypernova Oy
 # Copyright 2016 Vaara-kirjastot
 #
 
@@ -11,21 +11,23 @@ use Getopt::Long qw(:config no_ignore_case);
 use RTTTL::Daemon;
 use RTTTL::Player;
 
-my $help;
-my $verbose = 0;
-my $operation = '';
-my $rtttl;
-my $daemon;
 my %params = ();
 
 GetOptions(
-    'h|help'                      => \$help,
-    'v|verbose:i'                 => \$params{cverbose},
-    'p|pin:i'                     => \$params{pin},
+#OPERATIONS
+    'h|help'                      => \$params{help},
+    'daemon'                      => \$params{daemon},
+    'l|list'                      => \$params{list},
+    's|song:s'                    => \$params{song},
+    'R|random'                    => \$params{random},
+    'r|rtttl:s'                   => \$params{rtttl},
+#SELECTORS
+    'S|selector:s'                => \$params{selector},
+    'i|index:i'                   => \$params{idx},
+#PARAMETERS
     'd|dir:s'                     => \$params{dir},
-    'o|operation:s'               => \$operation,
-    'r|rtttl:s'                   => \$rtttl,
-    'daemon'                      => \$daemon,
+    'p|pin:i'                     => \$params{pin},
+    'v|verbose:i'                 => \$params{cverbose},
     'rundir:s'                    => \$params{rundir},
     'user:s'                      => \$params{user},
     'group:s'                     => \$params{group},
@@ -37,26 +39,36 @@ my $usage = <<USAGE;
 A happy RTTTL-player to play RTTTL-songs from the given directory
 You can configure some of these options in /etc/emb-rtttl/config
 
-
-  -v --verbose            Defaults to 0, minimal output.
-                          1, some output
+OPERATIONS:
 
   -h --help               HELP!
 
-  -o --operation
-                  list    list all songs in the directory
-                  song    play the target song, or all songs matching the given regexp
-                  random  play a random song
-                  rtttl   Same as -r --rtttl
+  --daemon                Starts a daemon process listening at /run/emb-rtttl/sock
+
+  -l --list               list all songs
+
+  -s --song               play the target song
+
+  -R --random             play a random song
+
+  -r --rtttl              rtttl-song/codes to play, eg.
+                          ToveriAccessDenied:d=4,o=4,b=100:32e,32d,32e,4c
+
+SELECTORS:
+
+  -S --selector           Select all song names matching this regexp. Defaults to all songs.
+
+  -i --index              From the selected songs, pick this index. Starts from 0.
+
+PARAMETERS:
 
   -d --dir                Which directory to use as the song base?
 
   -p --pin                Which GPIO pin to use for playback?
 
-  -r --rtttl              rtttl-song/codes to play, eg.
-                          ToveriAccessDenied:d=4,o=4,b=100:32e,32d,32e,4c
+  -v --verbose            Defaults to 0, minimal output.
+                          1, some output
 
-  --daemon                Starts a daemon process listening at /run/emb-rtttl/sock
   --rundir PATH           Where the daemon socket and pid are placed, defaults to ./
 
   --user NAME             Defaults to pi
@@ -64,35 +76,26 @@ You can configure some of these options in /etc/emb-rtttl/config
 
 EXAMPLES:
 
-  perl scripts/rtttl-player.pl -p 1 -d rtttl -o list
-  perl scripts/rtttl-player.pl -p 1 -d rtttl -o song-nyancat
-  rtttl-player.pl -p 1 -o random
+  perl scripts/rtttl-player -p 1 -d rtttl --list
+  perl scripts/rtttl-player -p 1 -d rtttl --song nyancat
+  rtttl-player -p 1 --random
   rtttl-player --daemon
+  rtttl-player --selector '^Abba' --random
+  rtttl-player --selector '^Abba' --index 1
 
 USAGE
 
-if ($help) {
+if ($params{help}) {
   print $usage;
   exit 0;
 }
-unless (defined($daemon) || $rtttl || $operation =~ /(^list$)|(^song-\w+)|(^random$)|(^rtttl$)/) {
-  print $usage."\n".
-        "You must define the --operation or --rtttl. Your --operation is '$operation'\n";
-  exit 1;
-}
-
 
 my $player = RTTTL::Player->new(\%params);
 
-if ($rtttl) {
-  $player->_playSong($rtttl);
-}
-elsif ($operation) {
-  $player->dispatchOperation($operation);
-}
-elsif (defined($daemon)) {
+if (defined($params{daemon})) {
   RTTTL::Daemon::start_daemon($player);
 }
 else {
-  die "I dont know what to do";
+  $player->dispatchOperation();
 }
+

@@ -37,19 +37,20 @@ my $confOrParamHelperText = "You can do it in conf file '$confFile' or as a cli 
 sub new {
     my ($class, $params) = @_;
     my $self = _loadConfig();
+    $self = {%$self, %$params};
 
-    $self->{pin}      = $params->{pin}      || $self->{'default.pin'} || 18;
-    $self->{dir}      = $params->{dir}      || $self->{'default.dir'} || '/var/local/rtttl';
-    $self->{cverbose} = $params->{cverbose} || $self->{'default.cverbose'} || 3;
-    $self->{rundir}   = $params->{rundir}   || $self->{'default.rundir'} || '.';
-    $self->{user}     = $params->{user}     || $self->{'default.user'} || 'pi';
-    $self->{group}    = $params->{group}    || $self->{'default.group'} || 'gpio';
+    $self->{pin}      = $self->{pin}      || $self->{'default.pin'} || 18;
+    $self->{dir}      = $self->{dir}      || $self->{'default.dir'} || '/var/local/rtttl';
+    $self->{cverbose} = $self->{cverbose} || $self->{'default.cverbose'} || 3;
+    $self->{rundir}   = $self->{rundir}   || $self->{'default.rundir'} || '.';
+    $self->{user}     = $self->{user}     || $self->{'default.user'} || 'pi';
+    $self->{group}    = $self->{group}    || $self->{'default.group'} || 'gpio';
 
     die "You must give parameter 'pin' to tell which wiringPi GPIO-pin we play as the beeper.\n$confOrParamHelperText" unless ($self->{pin});
     die "You must give parameter 'dir' to tell in which directory we look for the rtttl-songs.\n$confOrParamHelperText" unless ($self->{dir});
     die "You must give parameter 'cverbose' to tell should we print debug information about the rtttl-play. The bigger the number the more verbosity. \n$confOrParamHelperText" unless ($self->{dir});
 
-    bless $self, $class;
+    bless($self, $class);
     $self->{songs} = undef; # {} lazy load songs here
     $self->{songNames} = undef; # []
 
@@ -74,32 +75,33 @@ sub init {
 }
 
 sub dispatchOperation {
-    my ($self, $op) = @_;
-    if ($op eq 'list') {
-        my ($songs, $names) = $self->getSongs();
-        print(join("\n",@$names));
-        print("\n");
+    my ($self) = @_;
+    my $rv;
+
+    if ($self->{rtttl}) {
+        $rv = $self->_playSong($self->{rtttl});
     }
-    elsif ($op eq 'random') {
-        $self->playRandomSong();
-    }
-    elsif ($op =~ /^rtttl-(.+)$/) {
-        $self->_playSong($1);
-    }
-    elsif ($op =~ /^song/) {
-        if ($op =~ /^song-(.+)$/) {
-            my $song = $1;
-            $self->playSong($song);
-        }
-        else {
-            die "Operation '$op' given but not prefixed with a song name?";
-        }
+    elsif ($self->{song}) {
+        $rv = $self->playSong($self->{song});
     }
     else {
-        die "Unknown operation '$op'";
+        my $selectedSongs = $self->selectSongs();
+        $selectedSongs = $self->selectIndex($selectedSongs);
+
+        if ($self->{list}) {
+            print(join("\n",@$selectedSongs));
+            print("\n");
+            $rv = $selectedSongs;
+        }
+        elsif ($self->{random}) {
+            $rv = $self->playRandomSong($selectedSongs);
+        }
+        else {
+            $rv = $self->playSongs($selectedSongs);
+        }
     }
-    print STDOUT ("OK: $op\r\n");
-    return $self;
+    print STDOUT (($rv) ? "OK" : "ERR").":\r\n";
+    return $rv;
 }
 
 =head2 _checkPid
@@ -141,44 +143,68 @@ sub getSongs {
     return ($self->{songs}, $self->{songNames});
 }
 
+sub selectSongs {
+    my ($self) = @_;
+
+    my ($songs, $names) = $self->getSongs();
+    if ($self->{selector}) {
+        my $selector = $self->{selector};
+        my @matchedNames = grep { $_ =~ m/$selector/ } @$names;
+        return \@matchedNames;
+    }
+    return $names;
+}
+
+sub selectIndex {
+    my ($self, $selectedSongs) = @_;
+
+    if ($self->{idx}) {
+        if (my $songName = $selectedSongs->[$self->{idx}]) {
+            return [$songName];
+        }
+        else {
+            die("Index '".$self->{idx}."' out of bounds, only '".scalar(@$selectedSongs)."' songs to choose from.\n");
+        }
+    }
+    return $selectedSongs;
+}
+
 sub playRandomSong {
-    my ($self, $maxLength) = @_;
+    my ($self, $selectedSongNames, $maxLength) = @_;
     $maxLength //= 20000;
+
     my ($songs, $names) = $self->getSongs();
 
-    my $songIndex = int(rand(scalar(@$names)));
-    while (length($songs->{$names->[$songIndex]}) > $maxLength) {
-        $songIndex = int(rand(scalar(@$names)));
+    my $songIndex = int(rand(scalar(@$selectedSongNames)));
+    while (length($songs->{$selectedSongNames->[$songIndex]}) > $maxLength) {
+        $songIndex = int(rand(scalar(@$selectedSongNames)));
     }
-    return $self->playSongIndex($songIndex);
+    return $self->_playSong($songs->{$selectedSongNames->[$songIndex]});
 }
 
 sub playSong {
-    my ($self, $name) = @_;
+    my ($self, $songName) = @_;
 
     my ($songs, $names) = $self->getSongs();
-    my @matches = grep { $_ =~ m/$name/ } @$names;
-    for my $songName (@matches) {
-        $self->_playSong($songs->{$songName});
-    }
-    return 1 if @matches;
-    return 0;
+    return $self->_playSong($songs->{$songName});
 }
 
-sub playSongIndex {
-    my ($self, $index) = @_;
+sub playSongs {
+    my ($self, $selectedSongNames) = @_;
 
     my ($songs, $names) = $self->getSongs();
-    my $song = $songs->{$names->[$index]};
-    return 0 unless $song;
-    $self->_playSong($song);
-    return 1;
+    for my $name (@$selectedSongNames) {
+        $self->_playSong($songs->{$name});
+    }
+    return 1 if @$selectedSongNames;
+    return 0;
 }
 
 sub _playSong {
     my ($self, $song) = @_;
     $self->init(); # Do the hardware init as late as possible to allow other than play operations in unprivileged mode.
-    return RTTTL::XS::play_rtttl($song);
+    RTTTL::XS::play_rtttl($song);
+    return 1;
 }
 
 

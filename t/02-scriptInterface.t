@@ -18,10 +18,13 @@ sub listRTTTLs {
 ok($player->playSong("ToveriAccessGranted"), "Played Toveri access granted");
 
 
-ok($player->playSongIndex(32), "Played song index 32");
+$player->{idx} = 14;
+ok($player->dispatchOperation(), "Played song index 14");
 
 
-ok($player->playRandomSong(), "Played a random song");
+$player->{idx} = undef;
+$player->{random} = 1;
+ok($player->dispatchOperation(), "Played a random song");
 
 
 done_testing;
