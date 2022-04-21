@@ -5,8 +5,6 @@
 
 #define isdigit(n) (n >= '0' && n <= '9')
 
-char str[121];
-
 const uint16_t note_frequencies[9][12] =
 {// C     C#    D     D#    E     F     F#    G     G#    A     A#    B     octave
   {0,    0,    0,    0,    0,    0,    0,    0,    0,    27,   29,   31  }, //0th

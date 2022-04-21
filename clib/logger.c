@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+char str[121];
+
 short logLevel;
 
 void loginit(short level) {

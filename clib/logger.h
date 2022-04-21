@@ -8,6 +8,8 @@
 #define DEBUG 4
 #define TRACE 5
 
+extern char str[121]; /* Log input buffer */
+
 void loginit(short level);
 
 void logp(short level, char* message);

@@ -10,8 +10,6 @@
 
 int pwmpin = 18; // Default pin, GPIO 18, only pin with hardware PWM
 
-char str[121];
-
 short hardware = 0; // Is hardware pwm in use? Otherwise uses the software tone library
 
 void rtttl_graceful_terminate(int signo){
